@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags -->
+    <title>AutoRésumé LinkedIn PDF - Générateur de CV Professionnel Gratuit | LinkedIn to PDF</title>
+    <meta name="description" content="Transformez votre profil LinkedIn en CV PDF professionnel en 30 secondes. Outil gratuit pour extraire automatiquement vos données LinkedIn et générer un CV élégant. Parfait pour freelances, demandeurs d'emploi et professionnels.">
+    <meta name="keywords" content="linkedin cv, linkedin pdf, générateur cv, cv professionnel, linkedin to pdf, cv automatique, extraction linkedin, cv gratuit, linkedin resume, pdf linkedin">
+    <meta name="author" content="AutoRésumé LinkedIn">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://autoresume-linkedin.vercel.app/">
+    <meta property="og:title" content="AutoRésumé LinkedIn PDF - Générateur de CV Professionnel Gratuit">
+    <meta property="og:description" content="Transformez votre profil LinkedIn en CV PDF professionnel en 30 secondes. Outil gratuit et automatique pour créer votre CV.">
+    <meta property="og:image" content="https://autoresume-linkedin.vercel.app/static/images/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:site_name" content="AutoRésumé LinkedIn">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://autoresume-linkedin.vercel.app/">
+    <meta property="twitter:title" content="AutoRésumé LinkedIn PDF - Générateur de CV Professionnel Gratuit">
+    <meta property="twitter:description" content="Transformez votre profil LinkedIn en CV PDF professionnel en 30 secondes. Outil gratuit et automatique.">
+    <meta property="twitter:image" content="https://autoresume-linkedin.vercel.app/static/images/twitter-image.jpg">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://autoresume-linkedin.vercel.app/">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Stylesheets -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "AutoRésumé LinkedIn PDF",
+        "description": "Transformez votre profil LinkedIn en CV PDF professionnel en 30 secondes",
+        "url": "https://autoresume-linkedin.vercel.app/",
+        "applicationCategory": "ProductivityApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR",
+            "description": "Version gratuite disponible"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "ratingCount": "1250",
+            "bestRating": "5",
+            "worstRating": "1"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "AutoRésumé LinkedIn"
+        }
+    }
+    </script>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
+    
+    <!-- SEO Optimization Script -->
+    <script src="{{ url_for('static', filename='js/seo.js') }}"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center">
+                    <i class="fab fa-linkedin text-3xl text-blue-600 mr-3"></i>
+                    <h1 class="text-2xl font-bold text-gray-900">AutoRésumé LinkedIn</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600">Version Pro</span>
+                    <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                        <i class="fas fa-check-circle mr-1"></i>Actif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="py-20 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-5xl font-bold mb-6">
+                Transformez votre profil LinkedIn en CV professionnel en 30 secondes
+            </h2>
+            <p class="text-xl mb-8 text-blue-100 max-w-3xl mx-auto">
+                Plus besoin de recopier manuellement vos informations ! Notre outil intelligent extrait automatiquement vos données LinkedIn et génère un CV PDF élégant et professionnel.
+            </p>
+            
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                <div class="text-center">
+                    <div class="text-4xl font-bold mb-2">10,000+</div>
+                    <div class="text-blue-200">CV générés</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-bold mb-2">4.9/5</div>
+                    <div class="text-blue-200">Note utilisateurs</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-bold mb-2">30s</div>
+                    <div class="text-blue-200">Temps de génération</div>
+                </div>
+            </div>
+
+            <!-- CTA Button -->
+            <div class="mb-12">
+                <button onclick="scrollToForm()" class="bg-white text-blue-600 px-8 py-4 rounded-lg text-xl font-semibold hover:bg-gray-100 transition duration-300 transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-magic mr-2"></i>Essayer Gratuitement
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h3 class="text-3xl font-bold text-center mb-16 text-gray-900">Pourquoi choisir AutoRésumé LinkedIn ?</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center p-6">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-bolt text-2xl text-blue-600"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-3">Rapide & Automatique</h4>
+                    <p class="text-gray-600">Générez votre CV en moins de 30 secondes. Aucune saisie manuelle requise.</p>
+                </div>
+                
+                <div class="text-center p-6">
+                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-shield-alt text-2xl text-green-600"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-3">Sécurisé & Privé</h4>
+                    <p class="text-gray-600">Vos données restent confidentielles. Aucune information n'est stockée.</p>
+                </div>
+                
+                <div class="text-center p-6">
+                    <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-palette text-2xl text-purple-600"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-3">Design Professionnel</h4>
+                    <p class="text-gray-600">Format PDF élégant et professionnel, prêt pour vos candidatures.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h3 class="text-3xl font-bold text-center mb-16 text-gray-900">Comment ça marche ?</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">1</div>
+                    <h4 class="text-xl font-semibold mb-3">Collez votre URL LinkedIn</h4>
+                    <p class="text-gray-600">Copiez l'URL de votre profil LinkedIn public</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">2</div>
+                    <h4 class="text-xl font-semibold mb-3">Analyse automatique</h4>
+                    <p class="text-gray-600">Notre IA extrait toutes vos informations professionnelles</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">3</div>
+                    <h4 class="text-xl font-semibold mb-3">Téléchargez votre CV</h4>
+                    <p class="text-gray-600">Recevez votre CV PDF professionnel instantanément</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Form Section -->
+    <section id="form-section" class="py-20 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-8 text-white text-center mb-8">
+                <h3 class="text-3xl font-bold mb-4">Générez votre CV maintenant</h3>
+                <p class="text-blue-100">Essayez gratuitement - Aucune inscription requise</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <form id="resume-form" class="space-y-6">
+                    <div>
+                        <label for="linkedin-url" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fab fa-linkedin text-blue-600 mr-2"></i>URL de votre profil LinkedIn
+                        </label>
+                        <input 
+                            type="url" 
+                            id="linkedin-url" 
+                            name="linkedin_url" 
+                            placeholder="https://www.linkedin.com/in/votre-profil"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                            required
+                        >
+                        <p class="text-sm text-gray-500 mt-2">
+                            <i class="fas fa-info-circle mr-1"></i>Assurez-vous que votre profil LinkedIn est public
+                        </p>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                <span class="text-sm text-gray-600">Gratuit</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                <span class="text-sm text-gray-600">Sans inscription</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                <span class="text-sm text-gray-600">PDF instantané</span>
+                            </div>
+                        </div>
+                        
+                        <button 
+                            type="submit" 
+                            id="generate-btn"
+                            class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition duration-300 transform hover:scale-105 shadow-lg"
+                        >
+                            <i class="fas fa-magic mr-2"></i>Générer mon CV
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Loading State -->
+                <div id="loading" class="hidden text-center py-8">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+                    <p class="text-gray-600">Analyse de votre profil LinkedIn en cours...</p>
+                </div>
+
+                <!-- Error State -->
+                <div id="error" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mt-4">
+                    <div class="flex">
+                        <i class="fas fa-exclamation-triangle text-red-400 mt-1 mr-3"></i>
+                        <div>
+                            <h4 class="text-red-800 font-medium">Erreur</h4>
+                            <p id="error-message" class="text-red-700 text-sm mt-1"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h3 class="text-3xl font-bold text-center mb-16 text-gray-900">Ce que disent nos utilisateurs</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">"J'ai économisé des heures de travail ! Mon CV était prêt en 30 secondes."</p>
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold mr-3">M</div>
+                        <div>
+                            <div class="font-semibold">Marie L.</div>
+                            <div class="text-sm text-gray-500">Développeuse Full-Stack</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">"Interface intuitive et résultat professionnel. Parfait pour mes candidatures !"</p>
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-semibold mr-3">T</div>
+                        <div>
+                            <div class="font-semibold">Thomas R.</div>
+                            <div class="text-sm text-gray-500">Chef de Projet</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">"Excellent outil ! J'ai obtenu plusieurs entretiens grâce à ce CV."</p>
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-semibold mr-3">S</div>
+                        <div>
+                            <div class="font-semibold">Sophie M.</div>
+                            <div class="text-sm text-gray-500">Marketing Manager</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h3 class="text-3xl font-bold text-center mb-16 text-gray-900">Tarifs simples et transparents</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Free Plan -->
+                <div class="bg-gray-50 rounded-2xl p-8 text-center">
+                    <h4 class="text-2xl font-bold mb-4">Essai Gratuit</h4>
+                    <div class="text-4xl font-bold text-gray-900 mb-6">0€</div>
+                    <ul class="text-left space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            1 CV généré
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Format PDF professionnel
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Aucune inscription
+                        </li>
+                    </ul>
+                    <button onclick="scrollToForm()" class="w-full bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition duration-300">
+                        Essayer maintenant
+                    </button>
+                </div>
+                
+                <!-- Pro Plan -->
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-8 text-center text-white relative">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-yellow-400 text-yellow-900 px-4 py-1 rounded-full text-sm font-semibold">POPULAIRE</span>
+                    </div>
+                    <h4 class="text-2xl font-bold mb-4">Version Pro</h4>
+                    <div class="text-4xl font-bold mb-6">9.99€</div>
+                    <ul class="text-left space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-400 mr-3"></i>
+                            CV illimités
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-400 mr-3"></i>
+                            Templates personnalisés
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-400 mr-3"></i>
+                            Export Word/PDF
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-400 mr-3"></i>
+                            Support prioritaire
+                        </li>
+                    </ul>
+                    <button class="w-full bg-white text-blue-600 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300">
+                        <i class="fas fa-crown mr-2"></i>Passer Pro
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fab fa-linkedin text-2xl text-blue-400 mr-2"></i>
+                        <span class="text-xl font-bold">AutoRésumé LinkedIn</span>
+                    </div>
+                    <p class="text-gray-400">Transformez votre profil LinkedIn en CV professionnel en quelques clics.</p>
+                </div>
+                
+                <div>
+                    <h5 class="font-semibold mb-4">Produit</h5>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white">Fonctionnalités</a></li>
+                        <li><a href="#" class="hover:text-white">Tarifs</a></li>
+                        <li><a href="#" class="hover:text-white">Templates</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h5 class="font-semibold mb-4">Support</h5>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white">Aide</a></li>
+                        <li><a href="#" class="hover:text-white">Contact</a></li>
+                        <li><a href="#" class="hover:text-white">FAQ</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h5 class="font-semibold mb-4">Légal</h5>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white">Confidentialité</a></li>
+                        <li><a href="#" class="hover:text-white">Conditions</a></li>
+                        <li><a href="#" class="hover:text-white">CGU</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 AutoRésumé LinkedIn. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html> 

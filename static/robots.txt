@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://autoresume-linkedin.vercel.app/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /private/
+Disallow: /api/validate-url
+Disallow: /api/generate-resume
+
+# Allow static resources
+Allow: /static/
+Allow: /templates/ 
