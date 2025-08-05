@@ -1,163 +1,156 @@
 // AutoRésumé LinkedIn - JavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize the application
-    initApp();
-});
+    const form = document.getElementById('resume-form');
+    const generateBtn = document.getElementById('generate-btn');
+    const demoBtn = document.getElementById('demo-btn');
+    const urlInput = document.getElementById('linkedin-url');
+    const errorDiv = document.getElementById('error-message');
+    const successDiv = document.getElementById('success-message');
 
-function initApp() {
-    // Add smooth scrolling to all links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
+    // Gestion du bouton démo
+    if (demoBtn) {
+        demoBtn.addEventListener('click', function() {
+            generateResume(true);
+        });
+    }
+
+    // Gestion du formulaire principal
+    if (form) {
+        form.addEventListener('submit', function(e) {
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
+            generateResume(false);
+        });
+    }
+
+    function generateResume(useSample = false) {
+        // Reset messages
+        hideMessages();
+        
+        // Show loading
+        showLoading(true);
+        
+        const linkedinUrl = urlInput ? urlInput.value.trim() : '';
+        
+        // Validation
+        if (!useSample && !linkedinUrl) {
+            showError('Veuillez entrer une URL LinkedIn valide');
+            showLoading(false);
+            return;
+        }
+
+        // Prepare data
+        const data = {
+            linkedin_url: linkedinUrl,
+            use_sample: useSample
+        };
+
+        // Make request
+        fetch('/api/generate-resume', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.blob();
+            } else {
+                return response.json().then(errorData => {
+                    throw new Error(JSON.stringify(errorData));
                 });
             }
+        })
+        .then(blob => {
+            // Download PDF
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = useSample ? 'CV_Exemple.pdf' : 'CV_LinkedIn.pdf';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            showSuccess(useSample ? 'CV d\'exemple généré avec succès !' : 'CV généré avec succès !');
+        })
+        .catch(error => {
+            try {
+                const errorData = JSON.parse(error.message);
+                if (errorData.use_sample_available) {
+                    showError(`${errorData.error}<br><br><strong>Suggestion :</strong> ${errorData.suggestion}`, true);
+                } else {
+                    showError(errorData.error || 'Erreur lors de la génération du CV');
+                }
+            } catch {
+                showError('Erreur lors de la génération du CV');
+            }
+        })
+        .finally(() => {
+            showLoading(false);
         });
-    });
+    }
 
-    // Initialize form handling
-    initFormHandling();
-    
+    function showLoading(show) {
+        if (show) {
+            if (generateBtn) {
+                generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Génération en cours...';
+                generateBtn.disabled = true;
+            }
+            if (demoBtn) {
+                demoBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Génération en cours...';
+                demoBtn.disabled = true;
+            }
+        } else {
+            if (generateBtn) {
+                generateBtn.innerHTML = '<i class="fas fa-file-pdf mr-2"></i>Générer mon CV';
+                generateBtn.disabled = false;
+            }
+            if (demoBtn) {
+                demoBtn.innerHTML = '<i class="fas fa-play mr-2"></i>Mode Démo';
+                demoBtn.disabled = false;
+            }
+        }
+    }
+
+    function showError(message, isHtml = false) {
+        if (errorDiv) {
+            errorDiv.innerHTML = isHtml ? message : `<i class="fas fa-exclamation-triangle mr-2"></i>${message}`;
+            errorDiv.classList.remove('hidden');
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function showSuccess(message) {
+        if (successDiv) {
+            successDiv.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
+            successDiv.classList.remove('hidden');
+            successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function hideMessages() {
+        if (errorDiv) errorDiv.classList.add('hidden');
+        if (successDiv) successDiv.classList.add('hidden');
+    }
+
+    // Auto-hide messages after 5 seconds
+    setInterval(() => {
+        if (errorDiv && !errorDiv.classList.contains('hidden')) {
+            errorDiv.classList.add('hidden');
+        }
+        if (successDiv && !successDiv.classList.contains('hidden')) {
+            successDiv.classList.add('hidden');
+        }
+    }, 5000);
+
     // Initialize animations
     initAnimations();
     
     // Initialize tooltips
     initTooltips();
-}
-
-function initFormHandling() {
-    const form = document.getElementById('resume-form');
-    const urlInput = document.getElementById('linkedin-url');
-    const generateBtn = document.getElementById('generate-btn');
-    const loadingDiv = document.getElementById('loading');
-    const errorDiv = document.getElementById('error');
-    const errorMessage = document.getElementById('error-message');
-
-    if (form) {
-        form.addEventListener('submit', handleFormSubmit);
-    }
-
-    if (urlInput) {
-        urlInput.addEventListener('input', validateUrl);
-        urlInput.addEventListener('blur', validateUrl);
-    }
-
-    function validateUrl() {
-        const url = urlInput.value.trim();
-        const isValid = url.includes('linkedin.com/in/');
-        
-        if (url && !isValid) {
-            urlInput.classList.add('input-error');
-            urlInput.classList.remove('input-success');
-            showError('Veuillez entrer une URL LinkedIn valide (ex: https://www.linkedin.com/in/votre-profil)');
-        } else if (url && isValid) {
-            urlInput.classList.remove('input-error');
-            urlInput.classList.add('input-success');
-            hideError();
-        } else {
-            urlInput.classList.remove('input-error', 'input-success');
-            hideError();
-        }
-    }
-
-    async function handleFormSubmit(e) {
-        e.preventDefault();
-        
-        const url = urlInput.value.trim();
-        
-        if (!url) {
-            showError('Veuillez entrer une URL LinkedIn');
-            return;
-        }
-        
-        if (!url.includes('linkedin.com/in/')) {
-            showError('Veuillez entrer une URL LinkedIn valide');
-            return;
-        }
-
-        // Show loading state
-        setLoadingState(true);
-        
-        try {
-            const response = await fetch('/api/generate-resume', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    linkedin_url: url
-                })
-            });
-
-            if (response.ok) {
-                // Handle PDF download
-                const blob = await response.blob();
-                const downloadUrl = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = downloadUrl;
-                a.download = `resume_${Date.now()}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(downloadUrl);
-                
-                // Show success message
-                showSuccess('CV généré avec succès ! Téléchargement en cours...');
-                
-                // Reset form
-                form.reset();
-                urlInput.classList.remove('input-success');
-                
-                // Track conversion (for analytics)
-                trackConversion();
-                
-            } else {
-                const errorData = await response.json();
-                showError(errorData.error || 'Erreur lors de la génération du CV');
-            }
-            
-        } catch (error) {
-            console.error('Error:', error);
-            showError('Erreur de connexion. Veuillez réessayer.');
-        } finally {
-            setLoadingState(false);
-        }
-    }
-
-    function setLoadingState(isLoading) {
-        if (isLoading) {
-            generateBtn.disabled = true;
-            generateBtn.classList.add('btn-loading');
-            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Génération en cours...';
-            loadingDiv.classList.remove('hidden');
-            hideError();
-        } else {
-            generateBtn.disabled = false;
-            generateBtn.classList.remove('btn-loading');
-            generateBtn.innerHTML = '<i class="fas fa-magic mr-2"></i>Générer mon CV';
-            loadingDiv.classList.add('hidden');
-        }
-    }
-
-    function showError(message) {
-        errorMessage.textContent = message;
-        errorDiv.classList.remove('hidden');
-        errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    function hideError() {
-        errorDiv.classList.add('hidden');
-    }
-
-    function showSuccess(message) {
-        showNotification(message, 'success');
-    }
-}
+});
 
 function initAnimations() {
     // Intersection Observer for fade-in animations
@@ -210,66 +203,6 @@ function initTooltips() {
             }
         });
     });
-}
-
-function showNotification(message, type = 'success') {
-    // Remove existing notifications
-    const existingNotifications = document.querySelectorAll('.notification');
-    existingNotifications.forEach(notification => notification.remove());
-
-    // Create new notification
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerHTML = `
-        <div class="flex items-center">
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} mr-2"></i>
-            <span>${message}</span>
-        </div>
-    `;
-
-    document.body.appendChild(notification);
-
-    // Show notification
-    setTimeout(() => {
-        notification.classList.add('show');
-    }, 100);
-
-    // Hide notification after 5 seconds
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
-    }, 5000);
-}
-
-function scrollToForm() {
-    const formSection = document.getElementById('form-section');
-    if (formSection) {
-        formSection.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-        });
-    }
-}
-
-function trackConversion() {
-    // Track conversion for analytics
-    if (typeof gtag !== 'undefined') {
-        gtag('event', 'conversion', {
-            'send_to': 'AW-CONVERSION_ID/CONVERSION_LABEL'
-        });
-    }
-    
-    // Track with Facebook Pixel
-    if (typeof fbq !== 'undefined') {
-        fbq('track', 'Purchase', {
-            value: 0.00,
-            currency: 'EUR'
-        });
-    }
 }
 
 // Utility functions

@@ -6,19 +6,8 @@ import json
 import os
 from datetime import datetime
 import time
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
-from reportlab.lib.pagesizes import letter, A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.lib import colors
-import io
 import re
+from urllib.parse import urlparse
 
 app = Flask(__name__)
 CORS(app)
@@ -27,135 +16,233 @@ class LinkedInScraper:
     def __init__(self):
         self.session = requests.Session()
         self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
         })
     
-    def scrape_profile(self, profile_url):
-        """Scrape LinkedIn profile data"""
+    def extract_profile_data(self, linkedin_url):
+        """Extrait les données du profil LinkedIn en utilisant requests + BeautifulSoup"""
         try:
-            # Use Selenium for better scraping
-            chrome_options = Options()
-            chrome_options.add_argument("--headless")
-            chrome_options.add_argument("--no-sandbox")
-            chrome_options.add_argument("--disable-dev-shm-usage")
-            chrome_options.add_argument("--disable-gpu")
-            chrome_options.add_argument("--window-size=1920,1080")
-            chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+            # Validation de l'URL
+            if not self._validate_linkedin_url(linkedin_url):
+                return {"error": "URL LinkedIn invalide"}
             
-            driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+            # Récupération de la page
+            response = self.session.get(linkedin_url, timeout=10)
+            response.raise_for_status()
             
-            try:
-                driver.get(profile_url)
-                time.sleep(3)
-                
-                # Extract profile data
-                profile_data = {
-                    'name': '',
-                    'headline': '',
-                    'location': '',
-                    'about': '',
-                    'experience': [],
-                    'education': [],
-                    'skills': [],
-                    'contact_info': {}
-                }
-                
-                # Get name
-                try:
-                    name_element = driver.find_element(By.CSS_SELECTOR, 'h1.text-heading-xlarge')
-                    profile_data['name'] = name_element.text.strip()
-                except:
-                    try:
-                        name_element = driver.find_element(By.CSS_SELECTOR, '.text-heading-xlarge')
-                        profile_data['name'] = name_element.text.strip()
-                    except:
-                        profile_data['name'] = "Nom non trouvé"
-                
-                # Get headline
-                try:
-                    headline_element = driver.find_element(By.CSS_SELECTOR, '.text-body-medium.break-words')
-                    profile_data['headline'] = headline_element.text.strip()
-                except:
-                    profile_data['headline'] = "Titre professionnel non trouvé"
-                
-                # Get location
-                try:
-                    location_element = driver.find_element(By.CSS_SELECTOR, '.text-body-small.inline.t-black--light.break-words')
-                    profile_data['location'] = location_element.text.strip()
-                except:
-                    profile_data['location'] = "Localisation non trouvée"
-                
-                # Get about section
-                try:
-                    about_element = driver.find_element(By.CSS_SELECTOR, '.pv-shared-text-with-see-more')
-                    profile_data['about'] = about_element.text.strip()
-                except:
-                    profile_data['about'] = "Section À propos non trouvée"
-                
-                # Get experience
-                try:
-                    experience_section = driver.find_element(By.ID, 'experience')
-                    experience_items = experience_section.find_elements(By.CSS_SELECTOR, '.pvs-list__item--line-separated')
-                    
-                    for item in experience_items[:5]:  # Limit to 5 most recent
-                        try:
-                            title_element = item.find_element(By.CSS_SELECTOR, '.t-bold span')
-                            company_element = item.find_element(By.CSS_SELECTOR, '.t-normal span')
-                            duration_element = item.find_element(By.CSS_SELECTOR, '.t-black--light span')
-                            
-                            experience = {
-                                'title': title_element.text.strip(),
-                                'company': company_element.text.strip(),
-                                'duration': duration_element.text.strip()
-                            }
-                            profile_data['experience'].append(experience)
-                        except:
-                            continue
-                except:
-                    profile_data['experience'] = []
-                
-                # Get education
-                try:
-                    education_section = driver.find_element(By.ID, 'education')
-                    education_items = education_section.find_elements(By.CSS_SELECTOR, '.pvs-list__item--line-separated')
-                    
-                    for item in education_items[:3]:  # Limit to 3 most recent
-                        try:
-                            school_element = item.find_element(By.CSS_SELECTOR, '.t-bold span')
-                            degree_element = item.find_element(By.CSS_SELECTOR, '.t-normal span')
-                            
-                            education = {
-                                'school': school_element.text.strip(),
-                                'degree': degree_element.text.strip()
-                            }
-                            profile_data['education'].append(education)
-                        except:
-                            continue
-                except:
-                    profile_data['education'] = []
-                
-                # Get skills
-                try:
-                    skills_section = driver.find_element(By.ID, 'skills')
-                    skill_items = skills_section.find_elements(By.CSS_SELECTOR, '.pvs-list__item--line-separated')
-                    
-                    for item in skill_items[:10]:  # Limit to 10 skills
-                        try:
-                            skill_element = item.find_element(By.CSS_SELECTOR, '.t-bold span')
-                            profile_data['skills'].append(skill_element.text.strip())
-                        except:
-                            continue
-                except:
-                    profile_data['skills'] = []
-                
-            finally:
-                driver.quit()
+            # Parsing avec BeautifulSoup
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Extraction des données
+            profile_data = {
+                "name": self._extract_name(soup),
+                "headline": self._extract_headline(soup),
+                "location": self._extract_location(soup),
+                "about": self._extract_about(soup),
+                "experience": self._extract_experience(soup),
+                "education": self._extract_education(soup),
+                "skills": self._extract_skills(soup),
+                "url": linkedin_url
+            }
+            
+            # Vérification si les données sont valides
+            if not profile_data["name"]:
+                return {"error": "Profil privé ou données non accessibles. Assurez-vous que votre profil LinkedIn est public."}
             
             return profile_data
             
+        except requests.RequestException as e:
+            return {"error": f"Erreur de connexion: {str(e)}"}
         except Exception as e:
-            print(f"Error scraping profile: {str(e)}")
+            return {"error": f"Erreur lors de l'extraction: {str(e)}"}
+    
+    def _validate_linkedin_url(self, url):
+        """Valide l'URL LinkedIn"""
+        try:
+            parsed = urlparse(url)
+            return 'linkedin.com' in parsed.netloc and '/in/' in parsed.path
+        except:
+            return False
+    
+    def _extract_name(self, soup):
+        """Extrait le nom du profil"""
+        # Plusieurs sélecteurs possibles pour le nom
+        selectors = [
+            'h1.text-heading-xlarge',
+            '.text-heading-xlarge',
+            'h1[class*="headline"]',
+            '.pv-text-details__left-panel h1',
+            '.profile-background-image__image h1'
+        ]
+        
+        for selector in selectors:
+            element = soup.select_one(selector)
+            if element:
+                return element.get_text(strip=True)
+        
+        return "Nom non trouvé"
+    
+    def _extract_headline(self, soup):
+        """Extrait le titre professionnel"""
+        selectors = [
+            '.text-body-medium.break-words',
+            '.pv-text-details__left-panel .text-body-medium',
+            '.profile-background-image__image .text-body-medium'
+        ]
+        
+        for selector in selectors:
+            element = soup.select_one(selector)
+            if element:
+                return element.get_text(strip=True)
+        
+        return "Titre professionnel non trouvé"
+    
+    def _extract_location(self, soup):
+        """Extrait la localisation"""
+        selectors = [
+            '.text-body-small.inline.t-black--light.break-words',
+            '.pv-text-details__left-panel .text-body-small',
+            '[data-section="location"]'
+        ]
+        
+        for selector in selectors:
+            element = soup.select_one(selector)
+            if element:
+                return element.get_text(strip=True)
+        
+        return "Localisation non trouvée"
+    
+    def _extract_about(self, soup):
+        """Extrait la section À propos"""
+        selectors = [
+            '#about ~ .display-flex .inline-show-more-text',
+            '.pv-shared-text-with-see-more .inline-show-more-text',
+            '[data-section="summary"] .inline-show-more-text'
+        ]
+        
+        for selector in selectors:
+            element = soup.select_one(selector)
+            if element:
+                return element.get_text(strip=True)
+        
+        return "Section À propos non trouvée"
+    
+    def _extract_experience(self, soup):
+        """Extrait l'expérience professionnelle"""
+        experience = []
+        selectors = [
+            '#experience ~ .pvs-list__outer-container .pvs-entity',
+            '.experience__item',
+            '[data-section="experience"] .pvs-entity'
+        ]
+        
+        for selector in selectors:
+            elements = soup.select(selector)
+            for element in elements[:5]:  # Limite à 5 expériences
+                exp = self._parse_experience_item(element)
+                if exp:
+                    experience.append(exp)
+        
+        return experience if experience else [{"title": "Expérience non trouvée", "company": "", "duration": ""}]
+    
+    def _parse_experience_item(self, element):
+        """Parse un élément d'expérience"""
+        try:
+            title_elem = element.select_one('.t-bold span, .pvs-entity__path-node span')
+            company_elem = element.select_one('.t-normal span, .pvs-entity__path-node + span')
+            duration_elem = element.select_one('.pvs-entity__caption-wrapper span')
+            
+            title = title_elem.get_text(strip=True) if title_elem else "Titre non trouvé"
+            company = company_elem.get_text(strip=True) if company_elem else "Entreprise non trouvée"
+            duration = duration_elem.get_text(strip=True) if duration_elem else "Durée non trouvée"
+            
+            return {"title": title, "company": company, "duration": duration}
+        except:
             return None
+    
+    def _extract_education(self, soup):
+        """Extrait l'éducation"""
+        education = []
+        selectors = [
+            '#education ~ .pvs-list__outer-container .pvs-entity',
+            '.education__item',
+            '[data-section="education"] .pvs-entity'
+        ]
+        
+        for selector in selectors:
+            elements = soup.select(selector)
+            for element in elements[:3]:  # Limite à 3 formations
+                edu = self._parse_education_item(element)
+                if edu:
+                    education.append(edu)
+        
+        return education if education else [{"school": "Formation non trouvée", "degree": "", "year": ""}]
+    
+    def _parse_education_item(self, element):
+        """Parse un élément d'éducation"""
+        try:
+            school_elem = element.select_one('.t-bold span, .pvs-entity__path-node span')
+            degree_elem = element.select_one('.t-normal span, .pvs-entity__path-node + span')
+            year_elem = element.select_one('.pvs-entity__caption-wrapper span')
+            
+            school = school_elem.get_text(strip=True) if school_elem else "École non trouvée"
+            degree = degree_elem.get_text(strip=True) if degree_elem else "Diplôme non trouvé"
+            year = year_elem.get_text(strip=True) if year_elem else "Année non trouvée"
+            
+            return {"school": school, "degree": degree, "year": year}
+        except:
+            return None
+    
+    def _extract_skills(self, soup):
+        """Extrait les compétences"""
+        skills = []
+        selectors = [
+            '#skills ~ .pvs-list__outer-container .pvs-entity',
+            '.skill-categories-entities .pvs-entity',
+            '[data-section="skills"] .pvs-entity'
+        ]
+        
+        for selector in selectors:
+            elements = soup.select(selector)
+            for element in elements[:10]:  # Limite à 10 compétences
+                skill = self._parse_skill_item(element)
+                if skill:
+                    skills.append(skill)
+        
+        return skills if skills else ["Compétences non trouvées"]
+
+    def _parse_skill_item(self, element):
+        """Parse un élément de compétence"""
+        try:
+            skill_elem = element.select_one('.t-bold span, .pvs-entity__path-node span')
+            return skill_elem.get_text(strip=True) if skill_elem else None
+        except:
+            return None
+    
+    def generate_sample_data(self, linkedin_url):
+        """Génère des données d'exemple pour les profils privés"""
+        return {
+            "name": "Exemple de Profil",
+            "headline": "Développeur Full Stack | Expert en Python & JavaScript",
+            "location": "Paris, France",
+            "about": "Développeur passionné avec 5+ années d'expérience dans le développement web. Spécialisé dans les technologies modernes et l'optimisation des performances.",
+            "experience": [
+                {"title": "Développeur Full Stack Senior", "company": "TechCorp", "duration": "2022 - Présent"},
+                {"title": "Développeur Backend", "company": "StartupXYZ", "duration": "2020 - 2022"},
+                {"title": "Développeur Junior", "company": "DigitalAgency", "duration": "2019 - 2020"}
+            ],
+            "education": [
+                {"school": "École d'Ingénieurs", "degree": "Master en Informatique", "year": "2019"},
+                {"school": "Université de Paris", "degree": "Licence en Mathématiques", "year": "2017"}
+            ],
+            "skills": ["Python", "JavaScript", "React", "Node.js", "Django", "PostgreSQL", "Docker", "AWS", "Git", "Agile"],
+            "url": linkedin_url
+        }
 
 class PDFGenerator:
     def __init__(self):
@@ -251,18 +338,29 @@ def index():
 def generate_resume():
     try:
         data = request.get_json()
-        linkedin_url = data.get('linkedin_url')
+        linkedin_url = data.get('linkedin_url', '').strip()
+        use_sample = data.get('use_sample', False)
         
-        if not linkedin_url:
+        if not linkedin_url and not use_sample:
             return jsonify({'error': 'URL LinkedIn requise'}), 400
-        
-        # Validate LinkedIn URL
-        if 'linkedin.com/in/' not in linkedin_url:
-            return jsonify({'error': 'URL LinkedIn invalide'}), 400
         
         # Scrape profile
         scraper = LinkedInScraper()
-        profile_data = scraper.scrape_profile(linkedin_url)
+        
+        if use_sample:
+            # Utiliser des données d'exemple
+            profile_data = scraper.generate_sample_data(linkedin_url or "https://linkedin.com/in/exemple")
+        else:
+            # Essayer de scraper le vrai profil
+            profile_data = scraper.extract_profile_data(linkedin_url)
+            
+            # Si le scraping échoue, proposer les données d'exemple
+            if profile_data.get('error'):
+                return jsonify({
+                    'error': profile_data['error'],
+                    'suggestion': 'Utilisez le mode démo avec des données d\'exemple',
+                    'use_sample_available': True
+                }), 500
         
         if not profile_data:
             return jsonify({'error': 'Impossible de récupérer les données du profil'}), 500
@@ -271,16 +369,17 @@ def generate_resume():
         pdf_generator = PDFGenerator()
         pdf_buffer = pdf_generator.generate_pdf(profile_data)
         
-        # Return PDF as download
+        # Return PDF
+        pdf_buffer.seek(0)
         return send_file(
             pdf_buffer,
             as_attachment=True,
-            download_name=f"resume_{profile_data.get('name', 'linkedin').replace(' ', '_')}.pdf",
+            download_name=f"CV_{profile_data['name'].replace(' ', '_')}.pdf",
             mimetype='application/pdf'
         )
         
     except Exception as e:
-        return jsonify({'error': f'Erreur: {str(e)}'}), 500
+        return jsonify({'error': f'Erreur lors de la génération: {str(e)}'}), 500
 
 @app.route('/api/validate-url', methods=['POST'])
 def validate_url():
