@@ -276,7 +276,7 @@ class PDFGenerator:
         ))
         
         self.styles.add(ParagraphStyle(
-            name='BodyText',
+            name='CustomBodyText',
             parent=self.styles['Normal'],
             fontSize=11,
             spaceAfter=6
@@ -291,14 +291,14 @@ class PDFGenerator:
         
         # Header with name and headline
         story.append(Paragraph(profile_data.get('name', 'Nom'), self.styles['CustomTitle']))
-        story.append(Paragraph(profile_data.get('headline', 'Titre professionnel'), self.styles['BodyText']))
-        story.append(Paragraph(profile_data.get('location', 'Localisation'), self.styles['BodyText']))
+        story.append(Paragraph(profile_data.get('headline', 'Titre professionnel'), self.styles['CustomBodyText']))
+        story.append(Paragraph(profile_data.get('location', 'Localisation'), self.styles['CustomBodyText']))
         story.append(Spacer(1, 20))
         
         # About section
         if profile_data.get('about'):
             story.append(Paragraph("À PROPOS", self.styles['SectionTitle']))
-            story.append(Paragraph(profile_data['about'], self.styles['BodyText']))
+            story.append(Paragraph(profile_data['about'], self.styles['CustomBodyText']))
             story.append(Spacer(1, 12))
         
         # Experience section
@@ -309,7 +309,7 @@ class PDFGenerator:
                 exp_text = f"<b>{exp.get('title', '')}</b><br/>"
                 exp_text += f"{exp.get('company', '')}<br/>"
                 exp_text += f"<i>{exp.get('duration', '')}</i>"
-                story.append(Paragraph(exp_text, self.styles['BodyText']))
+                story.append(Paragraph(exp_text, self.styles['CustomBodyText']))
                 story.append(Spacer(1, 8))
         
         # Education section
@@ -319,19 +319,19 @@ class PDFGenerator:
             for edu in profile_data['education']:
                 edu_text = f"<b>{edu.get('school', '')}</b><br/>"
                 edu_text += f"{edu.get('degree', '')}"
-                story.append(Paragraph(edu_text, self.styles['BodyText']))
+                story.append(Paragraph(edu_text, self.styles['CustomBodyText']))
                 story.append(Spacer(1, 8))
         
         # Skills section
         if profile_data.get('skills'):
             story.append(Paragraph("COMPÉTENCES", self.styles['SectionTitle']))
             skills_text = ", ".join(profile_data['skills'])
-            story.append(Paragraph(skills_text, self.styles['BodyText']))
+            story.append(Paragraph(skills_text, self.styles['CustomBodyText']))
         
         # Footer
         story.append(Spacer(1, 30))
         footer_text = f"Généré automatiquement depuis LinkedIn le {datetime.now().strftime('%d/%m/%Y à %H:%M')}"
-        story.append(Paragraph(footer_text, self.styles['BodyText']))
+        story.append(Paragraph(footer_text, self.styles['CustomBodyText']))
         
         doc.build(story)
         buffer.seek(0)
