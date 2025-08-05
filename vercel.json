@@ -3,7 +3,10 @@
   "builds": [
     {
       "src": "app.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "maxDuration": 30
+      }
     },
     {
       "src": "static/**",
@@ -31,11 +34,6 @@
   "env": {
     "FLASK_ENV": "production",
     "FLASK_DEBUG": "False"
-  },
-  "functions": {
-    "app.py": {
-      "maxDuration": 30
-    }
   },
   "headers": [
     {
